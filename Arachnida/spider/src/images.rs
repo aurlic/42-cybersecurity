@@ -7,13 +7,10 @@ use url::Url;
 
 pub fn get_full_url(base_url: &str, image_url: &str) -> String {
     if image_url.starts_with("http") {
-        // Si l'URL est déjà absolue
         image_url.to_string()
     } else if image_url.starts_with("//") {
-        // Si l'URL commence par //
         format!("http:{}", image_url)
     } else {
-        // Si l'URL est relative
         let base = Url::parse(base_url).unwrap();
         base.join(image_url).unwrap().to_string()
     }

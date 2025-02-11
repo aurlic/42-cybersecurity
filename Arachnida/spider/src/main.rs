@@ -84,7 +84,7 @@ fn main() {
                 }
 
                 for url in valid_images {
-                    let full_url = images::get_full_url(&valid_url, &url); // Ajout de la gestion des URL complètes
+                    let full_url = images::get_full_url(&valid_url, &url);
                     println!("📸 Downloading image: {}", full_url);
                     match images::download_image(full_url.as_str(), &args.path) {
                         Ok(_) => println!("✅ Successfully downloaded: {}", full_url),
