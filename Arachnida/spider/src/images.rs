@@ -63,6 +63,20 @@ pub fn extract_images(html: &str) -> Vec<String> {
     image_urls
 }
 
+pub fn extract_links(html: &str) -> Vec<String> {
+    let document = Html::parse_document(html);
+    let selector = Selector::parse("a").unwrap();
+    let mut links = Vec::new();
+
+    for element in document.select(&selector) {
+        if let Some(href) = element.value().attr("href") {
+            links.push(href.to_string());
+        }
+    }
+
+    links
+}
+
 pub fn filter_images(images: Vec<String>) -> Vec<String> {
     let mut valid_images = Vec::new();
     let allowed_extensions = ["jpg", "jpeg", "png", "gif", "bmp"];
