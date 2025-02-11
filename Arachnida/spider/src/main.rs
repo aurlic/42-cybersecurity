@@ -1,4 +1,5 @@
 use clap::Parser;
+use indicatif::{ProgressBar, ProgressStyle};
 use reqwest::blocking::{get, Client};
 use reqwest::header::USER_AGENT;
 use std::error::Error;
@@ -78,19 +79,24 @@ fn main() {
             if valid_images.is_empty() {
                 println!("⚠️ No valid image found.");
             } else {
-                println!("📸 Valid image(s) found :");
-                for url in &valid_images {
-                    println!("  - {}", url);
-                }
+                println!("📸 Found {} valid image(s)", valid_images.len());
+
+                let pb = ProgressBar::new(valid_images.len() as u64);
+                pb.set_style(
+                    ProgressStyle::default_bar()
+                        .template("{msg} {wide_bar} {pos}/{len}")
+                        .expect("Error setting progress bar style"),
+                );
 
                 for url in valid_images {
                     let full_url = images::get_full_url(&valid_url, &url);
-                    println!("📸 Downloading image: {}", full_url);
                     match images::download_image(full_url.as_str(), &args.path) {
-                        Ok(_) => println!("✅ Successfully downloaded: {}", full_url),
-                        Err(e) => eprintln!("{}", e),
+                        Ok(_) => pb.inc(1),
+                        Err(_) => pb.inc(1),
                     }
                 }
+
+                pb.finish_with_message("Download complete");
             }
         }
         Err(e) => println!("❌ Error during download : {}", e),

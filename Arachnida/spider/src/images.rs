@@ -44,10 +44,7 @@ pub fn download_image(url: &str, path: &str) -> Result<(), String> {
     };
 
     match io::copy(&mut response.bytes().unwrap().as_ref(), &mut file) {
-        Ok(_) => {
-            println!("✅ Image downloaded: {}", filename);
-            Ok(())
-        }
+        Ok(_) => Ok(()),
         Err(e) => Err(format!("❌ Error writing file: {}", e)),
     }
 }
