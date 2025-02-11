@@ -1,9 +1,10 @@
 use clap::Parser;
 use reqwest::blocking::{get, Client};
 use reqwest::header::USER_AGENT;
-use scraper::{Html, Selector};
 use std::error::Error;
 use url::Url;
+
+mod images;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -59,51 +60,30 @@ fn fetch_page(url: &str) -> Result<String, Box<dyn Error>> {
     Ok(body)
 }
 
-fn extract_images(html: &str) -> Vec<String> {
-    let document = Html::parse_document(html);
-    let selector = Selector::parse("img").unwrap();
-    let mut image_urls = Vec::new();
-
-    for element in document.select(&selector) {
-        if let Some(src) = element.value().attr("src") {
-            image_urls.push(src.to_string());
-        }
-    }
-
-    image_urls
-}
-
-fn filter_images(images: Vec<String>) -> Vec<String> {
-    let mut valid_images = Vec::new();
-    let allowed_extensions = ["jpg", "jpeg", "png", "gif", "bmp"];
-
-    for image in images {
-        for ext in allowed_extensions {
-            if image.ends_with(ext) {
-                valid_images.push(image);
-                break;
-            }
-        }
-    }
-
-    valid_images
-}
-
 fn main() {
     let args = Args::parse();
 
     let valid_url = match check_url(&args.url) {
-        Some(url) => url,
+        Some(url) => url.to_string(),
         None => std::process::exit(1),
     };
 
-    match fetch_page(&args.url) {
-        Ok(html) => println!("✅ Page téléchargée avec succès !"),
-        Err(e) => println!("❌ Erreur lors du téléchargement : {}", e),
-    }
+    match fetch_page(&valid_url) {
+        Ok(html) => {
+            println!("✅ Successfully downloaded html");
 
-    // println!("✅ URL valide et accessible: {}", valid_url);
-    // println!("Récursif: {}", args.rec);
-    // println!("Profondeur: {}", args.depth);
-    // println!("Chemin: {}", args.path);
+            let images = images::extract_images(&html);
+            let valid_images = images::filter_images(images);
+
+            if valid_images.is_empty() {
+                println!("⚠️ No valid image found.");
+            } else {
+                println!("📸 Valid image(s) found :");
+                for url in valid_images {
+                    println!("  - {}", url);
+                }
+            }
+        }
+        Err(e) => println!("❌ Error during download : {}", e),
+    }
 }
