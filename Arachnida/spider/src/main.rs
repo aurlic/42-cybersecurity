@@ -79,8 +79,17 @@ fn main() {
                 println!("⚠️ No valid image found.");
             } else {
                 println!("📸 Valid image(s) found :");
-                for url in valid_images {
+                for url in &valid_images {
                     println!("  - {}", url);
+                }
+
+                for url in valid_images {
+                    let full_url = images::get_full_url(&valid_url, &url); // Ajout de la gestion des URL complètes
+                    println!("📸 Downloading image: {}", full_url);
+                    match images::download_image(full_url.as_str(), &args.path) {
+                        Ok(_) => println!("✅ Successfully downloaded: {}", full_url),
+                        Err(e) => eprintln!("{}", e),
+                    }
                 }
             }
         }
