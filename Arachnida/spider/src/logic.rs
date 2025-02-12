@@ -81,7 +81,7 @@ pub fn process_page(url: &str, args: &Args) {
 }
 
 pub fn recursive_crawl(url: &str, args: &Args, depth: usize) {
-    if depth > args.depth.into() {
+    if depth > args.depth as usize {
         return;
     }
 
