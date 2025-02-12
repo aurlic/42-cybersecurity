@@ -3,3 +3,5 @@
 - enhance interface (colors, ..)
 
 - explore threads
+
+- check URL do avoid duplicates
