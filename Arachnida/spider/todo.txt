@@ -1,0 +1,5 @@
+- fetching page twice in recursion
+
+- enhance interface (colors, ..)
+
+- explore threads
