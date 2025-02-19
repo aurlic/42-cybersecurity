@@ -3,6 +3,8 @@ mod arg;
 use arg::Args;
 use clap::Parser;
 use exif::{Reader, Tag};
+use gif::DecodeOptions;
+use png::Decoder as pngDecoder;
 use std::fs::File;
 use std::path::Path;
 
@@ -74,14 +76,51 @@ fn process_jpg(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn process_png(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let file = File::open(filename)?;
+    let decoder = pngDecoder::new(file);
+
+    let reader = decoder.read_info()?;
+
+    let (width, height) = reader.info().size();
+    let (color_type, bit_depth) = reader.output_color_type();
+
+    println!("📏 Dimensions : {} x {} px", width, height);
+    println!("🎨 Color type: {:?}", color_type);
+    println!("🖼 Bit depth : {:?}", bit_depth);
+
     Ok(())
 }
 
-fn process_bmp(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn process_bmp(_filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
 fn process_gif(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let file = File::open(filename)?;
+
+    let mut decoder = DecodeOptions::new();
+    decoder.set_color_output(gif::ColorOutput::RGBA);
+
+    let mut decoder = decoder.read_info(file)?;
+
+    let width = decoder.width();
+    let height = decoder.height();
+    let global_palette = decoder.global_palette().is_some();
+    let repeat = decoder.repeat();
+
+    println!("📏 Dimensions: {} x {} px", width, height);
+    println!(
+        "🎨 Global palette: {}",
+        if global_palette { "Yes" } else { "No" }
+    );
+    println!("🔁 Repeat: {:?}", repeat);
+
+    let mut frame_count = 0;
+    while decoder.read_next_frame()?.is_some() {
+        frame_count += 1;
+    }
+    println!("🎞 Number of frames: {}", frame_count);
+
     Ok(())
 }
 
