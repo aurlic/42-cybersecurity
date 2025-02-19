@@ -1,0 +1,9 @@
+[package]
+name = "scorpion"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.30", features = ["derive"] }
+kamadak-exif = "0.6.1"
+image = "0.25.5"
