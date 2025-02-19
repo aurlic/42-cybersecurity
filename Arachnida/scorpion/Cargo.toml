@@ -7,3 +7,4 @@ edition = "2021"
 clap = { version = "4.5.30", features = ["derive"] }
 kamadak-exif = "0.6.1"
 image = "0.25.5"
+png = "0.17.16"
