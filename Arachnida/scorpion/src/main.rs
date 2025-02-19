@@ -6,20 +6,90 @@ use exif::{Reader, Tag};
 use std::fs::File;
 use std::path::Path;
 
-fn process_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn process_jpg(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     let file = File::open(filename)?;
     let mut bufreader = std::io::BufReader::new(&file);
     let exif = Reader::new().read_from_container(&mut bufreader)?;
 
-    println!("📜 Available EXIF metadata for '{}':", filename);
+    let mut camera_model = None;
+    let mut datetime = None;
+    let mut shutter_speed = None;
+    let mut aperture = None;
+    let mut iso = None;
+    let mut focal_length = None;
+    let mut flash = None;
+    let mut width = None;
+    let mut height = None;
+    let mut resolution_x = None;
+    let mut resolution_y = None;
+    let mut color_space = None;
 
     for field in exif.fields() {
-        let tag_name = format!("{:?}", field.tag);
-        let value = field.display_value().to_string();
-        println!("🔹 {}: {}", tag_name, value);
+        match field.tag {
+            Tag::Model => camera_model = Some(field.display_value().to_string()),
+            Tag::DateTimeOriginal => datetime = Some(field.display_value().to_string()),
+            Tag::ExposureTime => shutter_speed = Some(field.display_value().to_string()),
+            Tag::FNumber => aperture = Some(field.display_value().to_string()),
+            Tag::PhotographicSensitivity => iso = Some(field.display_value().to_string()),
+            Tag::FocalLength => focal_length = Some(field.display_value().to_string()),
+            Tag::Flash => flash = Some(field.display_value().to_string()),
+            Tag::PixelXDimension => width = Some(field.display_value().to_string()),
+            Tag::PixelYDimension => height = Some(field.display_value().to_string()),
+            Tag::XResolution => resolution_x = Some(field.display_value().to_string()),
+            Tag::YResolution => resolution_y = Some(field.display_value().to_string()),
+            Tag::ColorSpace => color_space = Some(field.display_value().to_string()),
+            _ => {}
+        }
     }
 
+    println!(
+        "📷 Camera : {}",
+        camera_model.unwrap_or("Unknown".to_string())
+    );
+    println!("🕒 Date : {}", datetime.unwrap_or("Unknown".to_string()));
+    println!(
+        "📸 Settings : {}s, f/{}, ISO {}, {}mm",
+        shutter_speed.unwrap_or("?".to_string()),
+        aperture.unwrap_or("?".to_string()),
+        iso.unwrap_or("?".to_string()),
+        focal_length.unwrap_or("?".to_string())
+    );
+    println!("🔦 Flash : {}", flash.unwrap_or("No".to_string()));
+    println!(
+        "🖼 Dimensions : {} x {} px",
+        width.unwrap_or("?".to_string()),
+        height.unwrap_or("?".to_string())
+    );
+    println!(
+        "📏 Resolution : {} DPI x {} DPI",
+        resolution_x.unwrap_or("?".to_string()),
+        resolution_y.unwrap_or("?".to_string())
+    );
+    println!(
+        "🎨 Colorimetric space : {}",
+        color_space.unwrap_or("Unknown".to_string())
+    );
+
     Ok(())
+}
+
+fn process_png(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+
+fn process_bmp(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+
+fn process_gif(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+
+fn get_file_extension(filename: &str) -> Option<String> {
+    Path::new(filename)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_lowercase())
 }
 
 fn main() {
@@ -42,9 +112,35 @@ fn main() {
             eprintln!("⚠️ Warning: '{}' is not a valid file.", file);
             continue;
         }
-        println!("📂 Processing file: {}", file);
-        if let Err(e) = process_file(file) {
-            eprintln!("❌ Error processing '{}': {}", file, e);
+
+        match get_file_extension(file).as_deref() {
+            Some("jpg") | Some("jpeg") => {
+                println!("📂 Processing JPG file: {}", file);
+                if let Err(e) = process_jpg(file) {
+                    eprintln!("❌ Error processing '{}': {}", file, e);
+                }
+            }
+            Some("png") => {
+                println!("📂 Processing PNG file: {}", file);
+                if let Err(e) = process_png(file) {
+                    eprintln!("❌ Error processing '{}': {}", file, e);
+                }
+            }
+            Some("bmp") => {
+                println!("📂 Processing BMP file: {}", file);
+                if let Err(e) = process_bmp(file) {
+                    eprintln!("❌ Error processing '{}': {}", file, e);
+                }
+            }
+            Some("gif") => {
+                println!("📂 Processing GIF file: {}", file);
+                if let Err(e) = process_gif(file) {
+                    eprintln!("❌ Error processing '{}': {}", file, e);
+                }
+            }
+            _ => {
+                eprintln!("⚠️ Unsupported file type for file '{}'", file);
+            }
         }
     }
 }
