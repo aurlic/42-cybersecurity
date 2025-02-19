@@ -155,22 +155,22 @@ fn main() {
         let file_lower = file.to_lowercase();
 
         if file_lower.ends_with(".jpg") || file_lower.ends_with(".jpeg") {
-            println!("📂 Processing JPG file: {}", file);
+            println!("\n📂 Processing JPG file: {}", file);
             if let Err(e) = process_jpg(file) {
                 eprintln!("❌ Error processing '{}': {}", file, e);
             }
         } else if file_lower.ends_with(".png") {
-            println!("📂 Processing PNG file: {}", file);
+            println!("\n📂 Processing PNG file: {}", file);
             if let Err(e) = process_png(file) {
                 eprintln!("❌ Error processing '{}': {}", file, e);
             }
         } else if file_lower.ends_with(".bmp") {
-            println!("📂 Processing BMP file: {}", file);
+            println!("\n📂 Processing BMP file: {}", file);
             if let Err(e) = process_bmp(file) {
                 eprintln!("❌ Error processing '{}': {}", file, e);
             }
         } else if file_lower.ends_with(".gif") {
-            println!("📂 Processing GIF file: {}", file);
+            println!("\n📂 Processing GIF file: {}", file);
             if let Err(e) = process_gif(file) {
                 eprintln!("❌ Error processing '{}': {}", file, e);
             }
