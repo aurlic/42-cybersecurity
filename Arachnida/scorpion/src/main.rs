@@ -4,6 +4,7 @@ use arg::Args;
 use clap::Parser;
 use exif::{Reader, Tag};
 use gif::DecodeOptions;
+use image::ImageReader;
 use png::Decoder as pngDecoder;
 use std::fs::File;
 use std::path::Path;
@@ -91,7 +92,13 @@ fn process_png(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn process_bmp(_filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn process_bmp(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let img = ImageReader::open(filename)?
+        .with_guessed_format()?
+        .decode()?;
+    println!("📏 Dimensions : {} x {} px", img.width(), img.height());
+    println!("🎨 Color type: {:?}", img.color());
+
     Ok(())
 }
 
