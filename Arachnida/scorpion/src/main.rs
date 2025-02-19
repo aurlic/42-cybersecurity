@@ -124,13 +124,6 @@ fn process_gif(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn get_file_extension(filename: &str) -> Option<String> {
-    Path::new(filename)
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .map(|ext| ext.to_lowercase())
-}
-
 fn main() {
     let args = Args::parse();
 
@@ -152,34 +145,30 @@ fn main() {
             continue;
         }
 
-        match get_file_extension(file).as_deref() {
-            Some("jpg") | Some("jpeg") => {
-                println!("📂 Processing JPG file: {}", file);
-                if let Err(e) = process_jpg(file) {
-                    eprintln!("❌ Error processing '{}': {}", file, e);
-                }
+        let file_lower = file.to_lowercase();
+
+        if file_lower.ends_with(".jpg") || file_lower.ends_with(".jpeg") {
+            println!("📂 Processing JPG file: {}", file);
+            if let Err(e) = process_jpg(file) {
+                eprintln!("❌ Error processing '{}': {}", file, e);
             }
-            Some("png") => {
-                println!("📂 Processing PNG file: {}", file);
-                if let Err(e) = process_png(file) {
-                    eprintln!("❌ Error processing '{}': {}", file, e);
-                }
+        } else if file_lower.ends_with(".png") {
+            println!("📂 Processing PNG file: {}", file);
+            if let Err(e) = process_png(file) {
+                eprintln!("❌ Error processing '{}': {}", file, e);
             }
-            Some("bmp") => {
-                println!("📂 Processing BMP file: {}", file);
-                if let Err(e) = process_bmp(file) {
-                    eprintln!("❌ Error processing '{}': {}", file, e);
-                }
+        } else if file_lower.ends_with(".bmp") {
+            println!("📂 Processing BMP file: {}", file);
+            if let Err(e) = process_bmp(file) {
+                eprintln!("❌ Error processing '{}': {}", file, e);
             }
-            Some("gif") => {
-                println!("📂 Processing GIF file: {}", file);
-                if let Err(e) = process_gif(file) {
-                    eprintln!("❌ Error processing '{}': {}", file, e);
-                }
+        } else if file_lower.ends_with(".gif") {
+            println!("📂 Processing GIF file: {}", file);
+            if let Err(e) = process_gif(file) {
+                eprintln!("❌ Error processing '{}': {}", file, e);
             }
-            _ => {
-                eprintln!("⚠️ Unsupported file type for file '{}'", file);
-            }
+        } else {
+            eprintln!("⚠️ Unsupported file type for file '{}'", file);
         }
     }
 }
