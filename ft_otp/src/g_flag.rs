@@ -45,11 +45,19 @@ pub fn handle_g(key: String) -> Result<(), OTPError> {
 
     let cipher = Aes256::new(GenericArray::from_slice(&encryption_key));
 
-    let mut block = GenericArray::clone_from_slice(&key_bytes);
-    cipher.encrypt_block(&mut block);
+    let mut encrypted_data = Vec::new();
+    for chunk in key_bytes.chunks(16) {
+        let mut block = GenericArray::from([0u8; 16]);
+        for (i, &byte) in chunk.iter().enumerate() {
+            block[i] = byte;
+        }
+
+        cipher.encrypt_block(&mut block);
+        encrypted_data.extend_from_slice(&block);
+    }
 
     let mut file = File::create("ft_otp.key").map_err(|_| OTPError::EncryptionError)?;
-    file.write_all(&block)
+    file.write_all(&encrypted_data)
         .map_err(|_| OTPError::EncryptionError)?;
 
     println!("✅ Key file '{}' is valid and saved securely!", key);
