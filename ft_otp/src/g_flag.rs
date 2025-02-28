@@ -1,6 +1,6 @@
 use crate::error::OTPError;
-// use aes::cipher::{BlockEncrypt, NewCipher};
-// use aes::Aes256;
+use aes::cipher::{generic_array::GenericArray, BlockEncrypt, KeyInit};
+use aes::Aes256;
 // use hex::{decode, encode};
 use rand::RngCore;
 use std::fs::{self, File};
@@ -37,8 +37,20 @@ pub fn handle_g(key: String) -> Result<(), OTPError> {
     if trimmed_content.len() < 64 || !is_hex(trimmed_content) {
         return Err(OTPError::InvalidKeyFormat);
     }
+    let trimmed_content = &trimmed_content[0..64];
 
-    let encryption_key = generate_random_key();
+    let encryption_key = generate_random_key()?;
+
+    let key_bytes = hex::decode(&trimmed_content).map_err(|_| OTPError::InvalidKeyFormat)?;
+
+    let cipher = Aes256::new(GenericArray::from_slice(&encryption_key));
+
+    let mut block = GenericArray::clone_from_slice(&key_bytes);
+    cipher.encrypt_block(&mut block);
+
+    let mut file = File::create("ft_otp.key").map_err(|_| OTPError::EncryptionError)?;
+    file.write_all(&block)
+        .map_err(|_| OTPError::EncryptionError)?;
 
     println!("✅ Key file '{}' is valid and saved securely!", key);
     Ok(())
