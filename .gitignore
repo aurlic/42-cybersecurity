@@ -23,3 +23,5 @@ Cargo.lock
 data/
 DS_Store
 .DS_Store
+aes.key
+ft_otp.key
